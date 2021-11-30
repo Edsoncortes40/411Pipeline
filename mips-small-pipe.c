@@ -75,7 +75,7 @@ void run(Pstate state) {
     
     /* copy everything so all we have to do is make changes.
        (this is primarily for the memory and reg arrays) *
-        memcpy(&new, state, sizeof(state_t));
+       memcpy(&new, state, sizeof(state_t)); */
 
     new.cycles++;
 
@@ -347,7 +347,7 @@ void run(Pstate state) {
       }
       else if(func(instruction) == SRL_FUNC)
       {
-	new.EXMEM.aluResult = tempA >> tempB;
+	new.EXMEM.aluResult = (unsigned int) tempA >> tempB;
 	new.EXMEM.readRegB = tempB;
       }
       else if(func(instruction) == NOPINSTRUCTION)
