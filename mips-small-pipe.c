@@ -58,12 +58,15 @@ int main(int argc, char *argv[]) {
 /************************************************************/
 void run(Pstate state) {
   state_t new;
+  int instruction;
+  int dataMemIndex;
+  
   memset(&new, 0, sizeof(state_t));
 
-  while (1) {
+  for(; 1; Instructions++) {
 
     printState(state);
-
+    
     /* copy everything so all we have to do is make changes.
        (this is primarily for the memory and reg arrays) */
     memcpy(&new, state, sizeof(state_t));
@@ -71,18 +74,188 @@ void run(Pstate state) {
     new.cycles++;
 
     /* --------------------- IF stage --------------------- */
-        
+
+    //get instruction from copy state
+    instruction = new.instrMem[new.pc / 4];
+    
+    //store instruction into IF to ID Register
+    new.IFID.instr = instruction;
+    new.IFID.pcPlus1 = new.pc;
+    
+    //increment program counter
+    new.pc = new.pc + 4;
+    
     /* --------------------- ID stage --------------------- */
-    word_pc = state->pc >> 2;
-    opcode = (state->mem[word_pc] >> OP_SHIFT) & OP_MASK;
-    arg0 = (state->mem[word_pc] >> R1_SHIFT) & REG_MASK;
-    arg1 = (state->mem[])
+
+    //get instruction from IF to ID register
+    instruction = new.IFID.istr;
+    
+    //store instruction settings to ID register
+    new.IDEX.istr = instruction;
+    new.IDEX.readRegA = new.reg[field_r1(instruction)];
+    new.IDEX.readRegB = new.reg[field_r2(instruction)];
+    new.IDEX.offset = offset(instruction);
+    new.IDEX.pcPlus1 = new.IFID.pcPlus1;
+
+    if(opcode(instruction) != HALT_OP &&
+       opcode(instruction == REG_REG_OP))
+    {
+      //update ID to EX Register
+      new.IDEX.instr = NOPINSTRUCTION;
+      new.IDEX.offset = offset(NOPINSTRUCTION);
+      new.IDEX.pcPlus1 = 0;
+      new.IEDEX.readRegA = 0;
+      new.IDEX.readRegB = 0;
+
+      //update instruction to IF to ID instruction
+      instruction = new.IFID.instr;
+      new.pc = new.pc - 4;
+      new.IFID.pcPlus1 = new.pc;
+
+      extraCycles = extraCycles + 1;
+    }
+    else if(opcode(instruction) != HALT_OP)
+    {
+      //update ID to EX register
+      new.IDEX.instr = NOPINSTRUCTION;
+      new.IDEX.offset = offset(NOPINSTRUCTION);
+      new.IDEX.pcPlus1 = 0;
+      new.IDEX.readRegA = 0;
+      new.IDEX.readRegB = 0;
+
+      //8pdate instruction to IF to ID instruction
+      instruction = new.IFID.instr;
+      new.pc = new.pc - 4;
+      new.IFID.pcPlus1 = new.pc;
+    }
+    
     /* --------------------- EX stage --------------------- */
 
+    //get instruction from EX to MEM register
+    instruction = new.EXMEM.instr;
+
+    //decode instructions
+   
+
+
+    //execute instructions
+    if(opcode(instruction) == ADDI_OP)
+    {
+      new.EXMEM.aluResult = readRegA + offset(instruction);
+      new.EXMEM.readRegB = state.IDEX.readRegB;
+    }
+    else if(opcode(instruction) == LW_OP)
+    {
+      new.EXMEM.aluResult = new.reg[field_r1(instruction)] + field_imm(instruction);
+      new.EXEMEM.readRegB = new.reg[field_r2(instruction)];
+    }
+    else if(opcode(instruction) == SW_OP)
+    {
+      new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+      new.EXMEM.aluResult = new.reg[field_r1(instruction)] + field_imm(instruction);
+    }
+    else if(opcode(instruction) == REG_REG_OP)
+    {
+      //check what kind of REG to REG instruction this is
+      if(func(instruction) == ADD_FUNC)
+      {
+	new.EXMEM.aluResult = new.reg[field_r1(instruction)] + new.reg[field_r1(instruction)];
+	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+      }
+      else if(func(instruction) == SUB_FUNC)
+      {
+	new.EXMEM.aluResult = new.reg[field_r1(instruction)] - new.reg[field_r2(instruction)];
+	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+      }
+      else if(func(instruction) == AND_FUNC)
+      {
+	new.EXMEM.aluResult = new.reg[field_r1(instruction)] & new.reg[field_r2(instruction)];
+	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+      }
+      else if(func(instruction) == OR_FUNC)
+      {
+	new.EXMEM.aluResult = new.reg[field_r1(instruction)] | new.reg[field_r2(instruction)];
+	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+      }
+      else if(func(instruction) == SLL_FUNC)
+      {
+	new.EXMEM.aluResult = new.reg[field_r1(instruction)] << new.reg[field_r2(instruction)];
+	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+      }
+      else if(func(instruction) == SRL_FUNC)
+      {
+	new.EXMEM.aluResult = new.reg[field_r1(instruction)] >> new.reg[field_r2(instruction)];
+	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+      }
+      else if(func(instruction) == NOPINSTRUCTION)
+      {
+	new.EXMEM.aluResult = 0;
+	new.EXMEM.readRegB = 0;
+      }
+      else
+      {
+	printf("error in reg to reg function decode!");
+      }
+    }
+    else
+    {
+      printf("error in opcode in execution!");
+    }
     /* --------------------- MEM stage --------------------- */
+    
+    //fetch instuction from MEM to WB register
+    instruction = new.MEMWB.instr;
 
+    if(opcode(instuction) == ADDI_OP)
+    {
+      new.MEMWB.writeData = state.EXMEM.aluResult;
+    }
+    else if(opcode(instruction) == LW_OP)
+    {
+      new.MEMWB.writeData = state.dataMem[state->EXMEM.aluResult / 4];
+    }
+    else if(opcode(instruction) == SW_OP)
+    {
+      new.MEMWB.writeData = state.EXMEM.readRegA;
+      dataMemIndex = new.reg[field_r1(instruction)] + field_imm(instruction);
+      new.dataMem[new.reg[dateMemIndex / 4] = state.EXMEM.readRegA;
+    }
+    else if(opcode(instruction) == REG_REG_OP)
+    {
+      new.MEMWB.writeData = state.EXMEM.aluResult;
+    }
+    else if(opcode(instruction) == HALT_OP)
+    {
+      //halt
+    }
     /* --------------------- WB stage --------------------- */
-
+      if(opcode(instruction) == ADDI_OP)
+      {
+        new.WBEND.writeData = state.MEMWB.writeData;
+	new.reg[field_r2(instruction)] = state.MEMWB.writeData;
+      }
+      else if(opcode(instruction) == LW_OP)
+      {
+	new.WBEND.writeData = state.MEMWB.writeData;
+	new.reg[field_r2(instruction)] = state.MEMWB.writeData;
+      }
+      else if(opcode(instruction) == SW_OP)
+      {
+	new.WBEND.writeData = state.MEMWB.writeData;
+      }
+      else if(opcode(instruction) == REG_REG_OP)
+      {
+	new.reg[field_r3(instruction)] = state.MEMWB.writeData;
+	new.WBEND.writeData = state.MEMWB.writeData;
+      }
+      else if(opcode(instruction) == HALT_OP)
+      {
+	exit(0);
+      }
+      else
+      {
+	printf("error in reading opcode in WB stage");
+      }
     /* --------------------- end stage --------------------- */
 
     /* transfer new state into current state */
