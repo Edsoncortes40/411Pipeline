@@ -99,37 +99,37 @@ void run(Pstate state) {
     /* --------------------- ID stage --------------------- */
 
     /* get instruction from IF to ID register */
-    new.IDEX.instr = state->IFID.instr;
+    instruction = state->IFID.instr;
+    new.IDEX.instr = instruction;
 
-    /* check forwarding register ID to EX */
-    instruction = new.IDEX.instr;
     
     /* store instruction settings to ID register */
     new.IDEX.readRegA = new.reg[field_r1(instruction)];
     new.IDEX.readRegB = new.reg[field_r2(instruction)];
     new.IDEX.offset = offset(instruction);
-    new.IDEX.pcPlus1 = new.IFID.pcPlus1;
+    new.IDEX.pcPlus1 = state->IFID.pcPlus1;
 
     /* check for forwarding from lw */
     lw_forwarding = state->IDEX.instr;
-    
-    if(opcode(instruction) != HALT_OP &&
-       opcode(instruction == REG_REG_OP &&
-       opcode(lw_forwarding) == LW_OP))
-    {
-      /* update ID to EX Register */
-      new.IDEX.instr = NOPINSTRUCTION;
-      new.IDEX.offset = offset(NOPINSTRUCTION);
-      new.IDEX.pcPlus1 = 0;
-      new.IDEX.readRegA = 0;
-      new.IDEX.readRegB = 0;
 
-      /* update instruction to IF to ID instruction */
-      instruction = new.IFID.instr;
-      new.pc = new.pc - 4;
-      new.IFID.pcPlus1 = new.pc;
-
-    }
+    if((field_r2(state->IDEX.instr) == field_r2(instruction) || field_r2(state->IDEX.instr) == field_r1(instruction)) &&
+       opcode(instruction) != HALT_OP &&
+       opcode(instruction) == REG_REG_OP &&
+       opcode(lw_forwarding) == LW_OP)
+      {
+	/* update ID to EX Register */
+	new.IDEX.instr = NOPINSTRUCTION;
+	new.IDEX.offset = offset(NOPINSTRUCTION);
+	new.IDEX.pcPlus1 = 0;
+	new.IDEX.readRegA = 0;
+	new.IDEX.readRegB = 0;
+	
+	/* update instruction to IF to ID instruction */
+	instruction = new.IFID.instr;
+	new.pc = new.pc - 4;
+	new.IFID.pcPlus1 = new.pc;
+	
+      }
     else if(opcode(lw_forwarding) == LW_OP &&
 	    opcode(field_r2(lw_forwarding) == field_r1(instruction)))
     {
