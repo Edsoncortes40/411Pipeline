@@ -481,8 +481,14 @@ void run(Pstate state) {
       {
 	printf("error in reading opcode in WB stage");
       }
-    /* --------------------- end stage --------------------- */
 
+      tempA = 0;
+      tempB = 0;
+
+
+      
+     /* --------------------- end stage --------------------- */
+      
     /* transfer new state into current state */
     memcpy(state, &new, sizeof(state_t));
   }
