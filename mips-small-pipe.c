@@ -123,7 +123,7 @@ void run(Pstate state) {
       new.IFID.pcPlus1 = new.pc;
 
     }
-    else if(opcode(instruction) != HALT_OP)
+    else if(opcode(state->IDEX.instr) == LW_OP)
     {
       /* update ID to EX register */
       new.IDEX.instr = NOPINSTRUCTION;
@@ -133,7 +133,8 @@ void run(Pstate state) {
       new.IDEX.readRegB = 0;
 
       /* pdate instruction to IF to ID instruction */
-      instruction = new.IFID.instr;
+      instruction = state->IFID.instr;
+      new.IFID.instr = instruction;
       new.pc = new.pc - 4;
       new.IFID.pcPlus1 = new.pc;
     }
@@ -141,8 +142,9 @@ void run(Pstate state) {
     /* --------------------- EX stage --------------------- */
 
     /* get instruction from EX to MEM register */
-    instruction = new.EXMEM.instr;
-
+    instruction = state->IDEX.instr;
+    new.EXMEM.instr = instruction;
+    
     /* decode instructions */
 
     /* check previous registers to see if there was forwarding to EX stage */
@@ -342,8 +344,8 @@ void run(Pstate state) {
       }
       else if(func(instruction) == SLL_FUNC)
       {
-	new.EXMEM.aluResult = new.reg[field_r1(instruction)] << new.reg[field_r2(instruction)];
-	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+	new.EXMEM.aluResult = tempA << tempB;
+	new.EXMEM.readRegB = tempB;
       }
       else if(func(instruction) == SRL_FUNC)
       {
@@ -367,7 +369,8 @@ void run(Pstate state) {
     /* --------------------- MEM stage --------------------- */
     
     /* fetch instuction from MEM to WB register */
-    instruction = new.MEMWB.instr;
+    instruction = state->EXMEM.instr;
+    new.MEMWB.instr = instruction;
 
     if(opcode(instruction) == ADDI_OP)
     {
@@ -392,7 +395,8 @@ void run(Pstate state) {
       /* halt */
     }
     /* --------------------- WB stage --------------------- */
-    instruction = new.WBEND.instr;
+    instruction = state->MEMWB.instr;
+    new.WBEND.instr = instruction;
     
       if(opcode(instruction) == ADDI_OP)
       {
