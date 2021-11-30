@@ -74,8 +74,8 @@ void run(Pstate state) {
     printState(state);
     
     /* copy everything so all we have to do is make changes.
-       (this is primarily for the memory and reg arrays) */
-    memcpy(&new, state, sizeof(state_t));
+       (this is primarily for the memory and reg arrays) *
+        memcpy(&new, state, sizeof(state_t));
 
     new.cycles++;
 
@@ -86,19 +86,22 @@ void run(Pstate state) {
     
     /* store instruction into IF to ID Register */
     new.IFID.instr = instruction;
-    new.IFID.pcPlus1 = new.pc;
     
     /* increment program counter */
     new.pc = new.pc + 4;
+
+    /* update program counter in IF to ID register */
+    new.IFID.pcPlus1 = new.pc;
     
     /* --------------------- ID stage --------------------- */
 
     /* get instruction from IF to ID register */
     new.IDEX.instr = state->IFID.instr;
-    instruction = new.IFID.instr;
+
+    /* check forwarding register ID to EX */
+    instruction = new.IDEX.instr;
     
     /* store instruction settings to ID register */
-    new.IDEX.instr = instruction;
     new.IDEX.readRegA = new.reg[field_r1(instruction)];
     new.IDEX.readRegB = new.reg[field_r2(instruction)];
     new.IDEX.offset = offset(instruction);
@@ -389,6 +392,8 @@ void run(Pstate state) {
       /* halt */
     }
     /* --------------------- WB stage --------------------- */
+    instruction = new.WBEND.instr;
+    
       if(opcode(instruction) == ADDI_OP)
       {
         new.WBEND.writeData = state->MEMWB.writeData;
