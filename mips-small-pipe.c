@@ -94,6 +94,7 @@ void run(Pstate state) {
     /* --------------------- ID stage --------------------- */
 
     /* get instruction from IF to ID register */
+    new.IDEX.instr = state->IFID.instr;
     instruction = new.IFID.instr;
     
     /* store instruction settings to ID register */
