@@ -74,8 +74,9 @@ void run(Pstate state) {
     printState(state);
     
     /* copy everything so all we have to do is make changes.
-       (this is primarily for the memory and reg arrays) *
-       memcpy(&new, state, sizeof(state_t)); */
+       (this is primarily for the memory and reg arrays) */
+
+    memcpy(&new, state, sizeof(state_t));
 
     new.cycles++;
 
