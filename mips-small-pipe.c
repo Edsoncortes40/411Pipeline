@@ -164,29 +164,37 @@ void run(Pstate state) {
     checkForward3 = opcode(state->WBEND.instr);
     tempA = new.reg[field_r1(instruction)];
     tempB = new.reg[field_r2(instruction)];
+    
     /* check EX to MEM register for forwarding */
     if(checkForward1 == ADDI_OP)
     {
-      if(field_r1(instruction) == field_r2(state->EXMEM.instr))
+      if(checkForward1 != opcode(NOPINSTRUCTION))
       {
-	tempA = state->EXMEM.aluResult;
-      }
 
-      if(field_r2(instruction) == field_r2(state->EXMEM.instr))
-      {
-	tempB = state->EXMEM.aluResult;
+	if(field_r1(instruction) == field_r2(state->EXMEM.instr))
+	  {
+	    tempA = state->EXMEM.aluResult;
+	  }
+	
+	if(field_r2(instruction) == field_r2(state->EXMEM.instr))
+	  {
+	    tempB = state->EXMEM.aluResult;
+	  }
       }
     }
     else if(checkForward1 == LW_OP)
     {
-      if(field_r1(instruction) == field_r2(state->EXMEM.instr))
+      if(checkForward1 != opcode(NOPINSTRUCTION))
       {
-	tempA = state->EXMEM.aluResult;
-      }
-
-      if(field_r2(instruction) == field_r2(state->EXMEM.instr))
-      {
-	tempB = state->EXMEM.aluResult;
+	if(field_r1(instruction) == field_r2(state->EXMEM.instr))
+	  {
+	    tempA = state->EXMEM.aluResult;
+	  }
+	
+	if(field_r2(instruction) == field_r2(state->EXMEM.instr))
+	  {
+	    tempB = state->EXMEM.aluResult;
+	  }
       }
     }
     else if(checkForward1 == SW_OP)
@@ -216,32 +224,38 @@ void run(Pstate state) {
     
     /* check MEM to WB register for forwarding */
     if(checkForward2 == ADDI_OP)
-    {
-      if(field_r1(instruction) == field_r2(state->MEMWB.instr))
       {
-	tempA = state->MEMWB.writeData;
-      }
-
-      if(field_r2(instruction) == field_r2(state->MEMWB.instr))
-      {
-	tempB = state->MEMWB.writeData;
-      }
+	if(checkForward2 != opcode(NOPINSTRUCTION))
+	{
+	  if(field_r1(instruction) == field_r2(state->MEMWB.instr))
+	    {
+	      tempA = state->MEMWB.writeData;
+	    }
+	  
+	  if(field_r2(instruction) == field_r2(state->MEMWB.instr))
+	    {
+	      tempB = state->MEMWB.writeData;
+	    }
+	}
     }
     else if(checkForward2 == LW_OP)
     {
-      if(field_r1(instruction) == field_r2(state->MEMWB.instr))
+      if(checkForward2 != opcode(NOPINSTRUCTION))
       {
-	tempA = state->MEMWB.writeData;
-      }
-
-      if(field_r2(instruction) == field_r2(state->MEMWB.instr))
-      {
-	tempB = state->MEMWB.writeData;
+	if(field_r1(instruction) == field_r2(state->MEMWB.instr))
+	{
+	   tempA = state->MEMWB.writeData;
+	}
+	
+	if(field_r2(instruction) == field_r2(state->MEMWB.instr))
+	  {
+	    tempB = state->MEMWB.writeData;
+	  }
       }
     }
     else if(checkForward2 == SW_OP)
     {
-      /* ??? */
+	  /* ??? */
     }
     else if(checkForward2 == REG_REG_OP)
     {
@@ -267,26 +281,32 @@ void run(Pstate state) {
     /* check WB to END register for forwarding */
     if(checkForward3 == ADDI_OP)
     {
-      if(field_r1(instruction) == field_r2(state->WBEND.instr))
+      if(checkForward3 != opcode(NOPINSTRUCTION))
       {
-	tempA = state->WBEND.writeData;
-      }
-
-      if(field_r2(instruction) == field_r2(state->WBEND.instr))
-      {
-	tempB = state->WBEND.writeData;
+	if(field_r1(instruction) == field_r2(state->WBEND.instr))
+	  {
+	    tempA = state->WBEND.writeData;
+	  }
+	
+	if(field_r2(instruction) == field_r2(state->WBEND.instr))
+	  {
+	    tempB = state->WBEND.writeData;
+	  }
       }
     }
     else if(checkForward3 == LW_OP)
     {
-      if(field_r1(instruction) == field_r2(state->WBEND.instr))
+      if(checkForward3 != opcode(NOPINSTRUCTION))
       {
-	tempA = state->WBEND.writeData;
-      }
-
-      if(field_r2(instruction) == field_r2(state->WBEND.instr))
-      {
-	tempB = state->WBEND.writeData;
+	if(field_r1(instruction) == field_r2(state->WBEND.instr))
+	  {
+	    tempA = state->WBEND.writeData;
+	  }
+	
+	if(field_r2(instruction) == field_r2(state->WBEND.instr))
+	  {
+	    tempB = state->WBEND.writeData;
+	  }
       }
     }
     else if(checkForward3 == SW_OP)
