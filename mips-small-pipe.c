@@ -1,3 +1,4 @@
+
 #include "mips-small-pipe.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -66,6 +67,7 @@ void run(Pstate state) {
   int checkForward3;
   int tempA;
   int tempB;
+  int lw_forwarding;
   
   memset(&new, 0, sizeof(state_t));
 
@@ -108,8 +110,12 @@ void run(Pstate state) {
     new.IDEX.offset = offset(instruction);
     new.IDEX.pcPlus1 = new.IFID.pcPlus1;
 
+    /* check for forwarding from lw */
+    lw_forwarding = state->IDEX.instr;
+    
     if(opcode(instruction) != HALT_OP &&
-       opcode(instruction == REG_REG_OP))
+       opcode(instruction == REG_REG_OP &&
+       opcode(lw_forwarding) == LW_OP))
     {
       /* update ID to EX Register */
       new.IDEX.instr = NOPINSTRUCTION;
@@ -124,20 +130,24 @@ void run(Pstate state) {
       new.IFID.pcPlus1 = new.pc;
 
     }
-    else if(opcode(state->IDEX.instr) == LW_OP)
+    else if(opcode(lw_forwarding) == LW_OP &&
+	    opcode(field_r2(lw_forwarding) == field_r1(instruction)))
     {
       /* update ID to EX register */
-      new.IDEX.instr = NOPINSTRUCTION;
-      new.IDEX.offset = offset(NOPINSTRUCTION);
-      new.IDEX.pcPlus1 = 0;
-      new.IDEX.readRegA = 0;
-      new.IDEX.readRegB = 0;
-
-      /* pdate instruction to IF to ID instruction */
-      instruction = state->IFID.instr;
-      new.IFID.instr = instruction;
-      new.pc = new.pc - 4;
-      new.IFID.pcPlus1 = new.pc;
+      if(opcode(instruction) != HALT_OP)
+      {
+	new.IDEX.instr = NOPINSTRUCTION;
+	new.IDEX.offset = offset(NOPINSTRUCTION);
+	new.IDEX.pcPlus1 = 0;
+	new.IDEX.readRegA = 0;
+	new.IDEX.readRegB = 0;
+      
+	/* pdate instruction to IF to ID instruction */
+	instruction = state->IFID.instr;
+	new.IFID.instr = instruction;
+	new.pc = new.pc - 4;
+	new.IFID.pcPlus1 = new.pc;
+      }
     }
     
     /* --------------------- EX stage --------------------- */
