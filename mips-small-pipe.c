@@ -125,13 +125,14 @@ void run(Pstate state) {
 	new.IDEX.readRegB = 0;
 	
 	/* update instruction to IF to ID instruction */
-	instruction = new.IFID.instr;
+	instruction = state->IFID.instr;
+	new.IFID.instr = instruction;
 	new.pc = new.pc - 4;
 	new.IFID.pcPlus1 = new.pc;
 	
       }
     else if(opcode(lw_forwarding) == LW_OP &&
-	    opcode(field_r2(lw_forwarding) == field_r1(instruction)))
+	    field_r2(lw_forwarding) == field_r1(instruction))
     {
       /* update ID to EX register */
       if(opcode(instruction) != HALT_OP)
