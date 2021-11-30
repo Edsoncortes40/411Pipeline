@@ -61,6 +61,12 @@ void run(Pstate state) {
   int instruction;
   int dataMemIndex;
   int instructions = 0;
+  int checkForward1;
+  int checkForward2;
+  int checkForward3;
+  int tempA;
+  int tempB;
+  
   memset(&new, 0, sizeof(state_t));
 
   for(; 1; instructions++) {
@@ -134,47 +140,201 @@ void run(Pstate state) {
     instruction = new.EXMEM.instr;
 
     /* decode instructions */
+
+    /* check previous registers to see if there was forwarding to EX stage */
+    checkForward1 = opcode(state->EXMEM.instr);
+    checkForward2 = opcode(state->MEMWB.instr);
+    checkForward3 = opcode(state->WBEND.instr);
+    tempA = new.reg[field_r1(instruction)];
+    tempB = new.reg[field_r2(instruction)];
+    /* check EX to MEM register for forwarding */
+    if(checkForward1 == ADDI_OP)
+    {
+      if(field_r1(instruction) == field_r2(state->EXMEM.instr))
+      {
+	tempA = state->EXMEM.aluResult;
+      }
+
+      if(field_r2(instruction) == field_r2(state->EXMEM.instr))
+      {
+	tempB = state->EXMEM.aluResult;
+      }
+    }
+    else if(checkForward1 == LW_OP)
+    {
+      if(field_r1(instruction) == field_r2(state->EXMEM.instr))
+      {
+	tempA = state->EXMEM.aluResult;
+      }
+
+      if(field_r2(instruction) == field_r2(state->EXMEM.instr))
+      {
+	tempB = state->EXMEM.aluResult;
+      }
+    }
+    else if(checkForward1 == SW_OP)
+    {
+      /* ??? */
+    }
+    else if(checkForward1 == REG_REG_OP)
+    {
+      if(field_r1(instruction) == field_r3(state->EXMEM.instr))
+      {
+	tempA = state->EXMEM.aluResult;
+      }
+
+      if(field_r2(instruction) == field_r3(state->EXMEM.instr))
+      {
+	tempB = state->EXMEM.aluResult;
+      }
+    }
+    else if(checkForward1 == HALT_OP)
+    {
+      printf("Halt in progress");
+    }
+    else
+    {
+      printf("No forwarding in EX to MEM register!");
+    }
     
+    /* check MEM to WB register for forwarding */
+    if(checkForward2 == ADDI_OP)
+    {
+      if(field_r1(instruction) == field_r2(state->MEMWB.instr))
+      {
+	tempA = state->MEMWB.writeData;
+      }
 
+      if(field_r2(instruction) == field_r2(state->MEMWB.instr))
+      {
+	tempB = state->MEMWB.writeData;
+      }
+    }
+    else if(checkForward2 == LW_OP)
+    {
+      if(field_r1(instruction) == field_r2(state->MEMWB.instr))
+      {
+	tempA = state->MEMWB.writeData;
+      }
 
+      if(field_r2(instruction) == field_r2(state->MEMWB.instr))
+      {
+	tempB = state->MEMWB.writeData;
+      }
+    }
+    else if(checkForward2 == SW_OP)
+    {
+      /* ??? */
+    }
+    else if(checkForward2 == REG_REG_OP)
+    {
+      if(field_r1(instruction) == field_r3(state->MEMWB.instr))
+      {
+	tempA = state->MEMWB.writeData;
+      }
+
+      if(field_r2(instruction) == field_r3(state->MEMWB.instr))
+      {
+	tempB = state->MEMWB.writeData;
+      }
+    }
+    else if(HALT_OP)
+    {
+      printf("Halt in progress");
+    }
+    else
+    {
+      printf("no Fowarding in MEM to WB register!");
+    }
+    
+    /* check WB to END register for forwarding */
+    if(checkForward3 == ADDI_OP)
+    {
+      if(field_r1(instruction) == field_r2(state->WBEND.instr))
+      {
+	tempA = state->WBEND.writeData;
+      }
+
+      if(field_r2(instruction) == field_r2(state->WBEND.instr))
+      {
+	tempB = state->WBEND.writeData;
+      }
+    }
+    else if(checkForward3 == LW_OP)
+    {
+      if(field_r1(instruction) == field_r2(state->WBEND.instr))
+      {
+	tempA = state->WBEND.writeData;
+      }
+
+      if(field_r2(instruction) == field_r2(state->WBEND.instr))
+      {
+	tempB = state->WBEND.writeData;
+      }
+    }
+    else if(checkForward3 == SW_OP)
+    {
+      /* ??? */
+    }
+    else if(checkForward3 == REG_REG_OP)
+    {
+      if(field_r1(instruction) == field_r3(state->WBEND.instr))
+      {
+	tempA = state->WBEND.writeData;
+      }
+
+      if(field_r2(instruction) == field_r3(state->WBEND.instr))
+      {
+	tempB = state->WBEND.writeData;
+      }
+    }
+    else if(checkForward3 == HALT_OP)
+    {
+      printf("Halt in progress");
+    }
+    else
+    {
+      printf("no forwarding in WB to END register!");
+    }
+    
     /* execute instructions */
     if(opcode(instruction) == ADDI_OP)
     {
-      new.EXMEM.aluResult = new.reg[field_r1(instruction)] + offset(instruction);
+      new.EXMEM.aluResult = tempA + offset(instruction);
       new.EXMEM.readRegB = state->IDEX.readRegB;
     }
     else if(opcode(instruction) == LW_OP)
     {
-      new.EXMEM.aluResult = new.reg[field_r1(instruction)] + field_imm(instruction);
+      new.EXMEM.aluResult = tempA + field_imm(instruction);
       new.EXMEM.readRegB = new.reg[field_r2(instruction)];
     }
     else if(opcode(instruction) == SW_OP)
     {
-      new.EXMEM.readRegB = new.reg[field_r2(instruction)];
-      new.EXMEM.aluResult = new.reg[field_r1(instruction)] + field_imm(instruction);
+      new.EXMEM.readRegB = tempB;
+      new.EXMEM.aluResult = tempA + field_imm(instruction);
     }
     else if(opcode(instruction) == REG_REG_OP)
     {
       /* check what kind of REG to REG instruction this is */
       if(func(instruction) == ADD_FUNC)
       {
-	new.EXMEM.aluResult = new.reg[field_r1(instruction)] + new.reg[field_r1(instruction)];
-	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+	new.EXMEM.aluResult = tempA + tempB;
+	new.EXMEM.readRegB = tempB;
       }
       else if(func(instruction) == SUB_FUNC)
       {
-	new.EXMEM.aluResult = new.reg[field_r1(instruction)] - new.reg[field_r2(instruction)];
-	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+	new.EXMEM.aluResult = tempA - tempB;
+	new.EXMEM.readRegB = tempB;
       }
       else if(func(instruction) == AND_FUNC)
       {
-	new.EXMEM.aluResult = new.reg[field_r1(instruction)] & new.reg[field_r2(instruction)];
-	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+	new.EXMEM.aluResult = tempA & tempB;
+	new.EXMEM.readRegB = tempB;
       }
       else if(func(instruction) == OR_FUNC)
       {
-	new.EXMEM.aluResult = new.reg[field_r1(instruction)] | new.reg[field_r2(instruction)];
-	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+	new.EXMEM.aluResult = tempA | tempB;
+	new.EXMEM.readRegB = tempB;
       }
       else if(func(instruction) == SLL_FUNC)
       {
@@ -183,8 +343,8 @@ void run(Pstate state) {
       }
       else if(func(instruction) == SRL_FUNC)
       {
-	new.EXMEM.aluResult = new.reg[field_r1(instruction)] >> new.reg[field_r2(instruction)];
-	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+	new.EXMEM.aluResult = tempA >> tempB;
+	new.EXMEM.readRegB = tempB;
       }
       else if(func(instruction) == NOPINSTRUCTION)
       {
