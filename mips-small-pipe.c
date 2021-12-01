@@ -1,4 +1,3 @@
-
 #include "mips-small-pipe.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -124,7 +123,7 @@ void run(Pstate state) {
     if((field_r2(lw_forwarding) == field_r2(instruction) || field_r2(lw_forwarding) == field_r1(instruction)) &&
        opcode(instruction) != HALT_OP &&
        opcode(instruction) == REG_REG_OP &&
-       opcode(state->IDEX.instr) == LW_OP)
+       opcode(lw_forwarding) == LW_OP)
       {
 	/* update ID to EX Register */
 	new.IDEX.instr = NOPINSTRUCTION;
@@ -187,7 +186,7 @@ void run(Pstate state) {
 	  }
 	
 	if(field_r2(instruction) == field_r2(state->WBEND.instr)
-	   && field_r2(instruction != 0))
+	   && field_r2(instruction) != 0)
 	  {
 	    tempB = state->WBEND.writeData;
 	  }
@@ -230,7 +229,7 @@ void run(Pstate state) {
 	  }
 	
 	if(field_r2(instruction) == field_r3(state->WBEND.instr)
-	   && field_r2(instruction != 0))
+	   && field_r2(instruction) != 0)
 	  {
 	    tempB = state->WBEND.writeData;
 	  }
@@ -303,16 +302,19 @@ void run(Pstate state) {
     }
     else if(checkForward2 == REG_REG_OP)
     {
-      if(field_r1(instruction) == field_r3(state->MEMWB.instr)
-	 && field_r1(instruction) != 0)
+      if(checkForward2 != opcode(NOPINSTRUCTION))
       {
-	tempA = state->MEMWB.writeData;
-      }
-
-      if(field_r2(instruction) == field_r3(state->MEMWB.instr)
-	 && field_r2(instruction) != 0)
-      {
-	tempB = state->MEMWB.writeData;
+	if(field_r1(instruction) == field_r3(state->MEMWB.instr)
+	   && field_r1(instruction) != 0)
+	  {
+	    tempA = state->MEMWB.writeData;
+	  }
+	
+	if(field_r2(instruction) == field_r3(state->MEMWB.instr)
+	   && field_r2(instruction) != 0)
+	  {
+	    tempB = state->MEMWB.writeData;
+	  }
       }
     }
     else if(checkForward2 == HALT_OP)
@@ -382,20 +384,17 @@ void run(Pstate state) {
     }
     else if(checkForward1 == REG_REG_OP)
     {
-      if(checkForward1 != opcode(NOPINSTRUCTION))
-      {
-	if(field_r1(instruction) == field_r3(state->EXMEM.instr)
-	   && field_r1(instruction) != 0)
-	  {
-	    tempA = state->EXMEM.aluResult;
-	  }
-	
-	if(field_r2(instruction) == field_r3(state->EXMEM.instr)
-	   && field_r2(instruction) != 0)
-	  {
-	    tempB = state->EXMEM.aluResult;
-	  }
-      }
+      if(field_r1(instruction) == field_r3(state->EXMEM.instr)
+	 && field_r1(instruction) != 0)
+	{
+	  tempA = state->EXMEM.aluResult;
+	}
+      
+      if(field_r2(instruction) == field_r3(state->EXMEM.instr)
+	 && field_r2(instruction) != 0)
+	{
+	  tempB = state->EXMEM.aluResult;
+	}
     }
     else if(checkForward1 == HALT_OP)
     {
@@ -405,12 +404,14 @@ void run(Pstate state) {
     {
       if(checkForward1 != opcode(NOPINSTRUCTION))
       {
-	if(field_r1(instruction) == field_r2(state->EXMEM.instr))
+	if(field_r1(instruction) == field_r2(state->EXMEM.instr)
+	   && field_r1(instruction) != 0)
 	{
 	  tempA = state->EXMEM.aluResult;
 	}
 
-	if(field_r2(instruction) == field_r2(state->EXMEM.instr))
+	if(field_r2(instruction) == field_r2(state->EXMEM.instr)
+	   && field_r2(instruction) != 0)
 	{
 	  tempB = state->EXMEM.aluResult;
 	}
@@ -543,6 +544,7 @@ void run(Pstate state) {
     {
       /* printf("error in MEM stage!"); */
     }
+    
     /* --------------------- WB stage --------------------- */
     instruction = state->MEMWB.instr;
     new.WBEND.instr = instruction;
