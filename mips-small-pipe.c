@@ -498,7 +498,8 @@ void run(Pstate state) {
     }
     else
     {
-      printf("error in opcode in execution!");
+      new.EXMEM.aluResult = 0;
+      new.EXMEM.readRegB = 0;
     }
     /* --------------------- MEM stage --------------------- */
     
