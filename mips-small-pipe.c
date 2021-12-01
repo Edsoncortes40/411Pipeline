@@ -467,7 +467,25 @@ void run(Pstate state) {
     }
     else if(opcode(instruction) == BEQZ_OP)
     {
-      
+      if((state->IDEX.offset < 0 && tempA == 0)
+	 || (state->IDEX.offset > 0 && tempA != 0))
+      {
+	new.EXMEM.aluResult = state->IDEX.pcPlus1 + offset(instruction);
+	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+      }
+      else
+      {
+	new.IFID.pcPlus1 = 0;
+	new.IDEX.readRegA = 0;
+	new.IDEX.pcPlus1 = 0;
+	new.IDEX.offset = 32;
+	new.IDEX.readRegB = 0;
+	new.IFID.instr = NOPINSTRUCTION;
+	new.IDEX.instr = NOPINSTRUCTION;
+	new.EXMEM.aluResult = state->IDEX.pcPlus1 + offset(instruction);
+	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
+	new.pc = state->IDEX.pcPlus1 + state->IDEX.offset;
+      }
     }
     else
     {
