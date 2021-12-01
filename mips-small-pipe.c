@@ -112,7 +112,7 @@ void run(Pstate state) {
     /* check for forwarding from lw */
     lw_forwarding = state->IDEX.instr;
 
-    if((field_r2(state->IDEX.instr) == field_r2(instruction) || field_r2(state->IDEX.instr) == field_r1(instruction)) &&
+    if((field_r2(lw_forwarding) == field_r2(instruction) || field_r2(lw_forwarding) == field_r1(instruction)) &&
        opcode(instruction) != HALT_OP &&
        opcode(instruction) == REG_REG_OP &&
        opcode(lw_forwarding) == LW_OP)
@@ -172,8 +172,8 @@ void run(Pstate state) {
       if(checkForward1 != opcode(NOPINSTRUCTION))
       {
 
-	if(field_r1(instruction) == field_r2(state->EXMEM.instr
-	   && field_r1(instruction) != 0))
+	if(field_r1(instruction) == field_r2(state->EXMEM.instr)
+	   && field_r1(instruction) != 0)
 	  {
 	    tempA = state->EXMEM.aluResult;
 	  }
@@ -339,12 +339,14 @@ void run(Pstate state) {
     {
       if(checkForward3 != opcode(NOPINSTRUCTION))
       {
-	if(field_r1(instruction) == field_r3(state->WBEND.instr))
+	if(field_r1(instruction) == field_r3(state->WBEND.instr
+	   && field_r1(instruction) != 0))
 	  {
 	    tempA = state->WBEND.writeData;
 	  }
 	
-	if(field_r2(instruction) == field_r3(state->WBEND.instr))
+	if(field_r2(instruction) == field_r3(state->WBEND.instr)
+	   && field_r2(instruction) != 0)
 	  {
 	    tempB = state->WBEND.writeData;
 	  }
@@ -440,7 +442,7 @@ void run(Pstate state) {
     {
       new.MEMWB.writeData = state->EXMEM.readRegB;
       dataMemIndex = new.reg[field_r1(instruction)] + field_imm(instruction);
-      new.dataMem[dataMemIndex / 4] = state->EXMEM.readRegB;
+      new.dataMem[dataMemIndex / 4] = new.MEMWB.writeData;
     }
     else if(opcode(instruction) == REG_REG_OP)
     {
@@ -448,7 +450,7 @@ void run(Pstate state) {
     }
     else if(opcode(instruction) == HALT_OP)
     {
-      /* halt */
+      new.MEMWB.writeData = 0;
     }
     /* --------------------- WB stage --------------------- */
     instruction = state->MEMWB.instr;
@@ -457,12 +459,12 @@ void run(Pstate state) {
       if(opcode(instruction) == ADDI_OP)
       {
         new.WBEND.writeData = state->MEMWB.writeData;
-	new.reg[field_r2(instruction)] = state->MEMWB.writeData;
+	new.reg[field_r2(instruction)] = new.WBEND.writeData;
       }
       else if(opcode(instruction) == LW_OP)
       {
 	new.WBEND.writeData = state->MEMWB.writeData;
-	new.reg[field_r2(instruction)] = state->MEMWB.writeData;
+	new.reg[field_r2(instruction)] = new.WBEND.writeData;
       }
       else if(opcode(instruction) == SW_OP)
       {
