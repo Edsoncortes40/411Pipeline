@@ -562,6 +562,8 @@ void run(Pstate state) {
       }
       else if(opcode(instruction) == HALT_OP)
       {
+	printf("machine halted\n");
+	printf("total of %d cycles executed\n", state->cycles);
 	exit(0);
       }
       else if(opcode(instruction) == BEQZ_OP)
