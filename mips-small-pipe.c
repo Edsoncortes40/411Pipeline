@@ -456,7 +456,7 @@ void run(Pstate state) {
       }
       else if(func(instruction) == OR_FUNC)
       {
-	new.EXMEM.aluResult = tempA | tempB;
+	new.EXMEM.aluResult = tempA | tempA;
 	new.EXMEM.readRegB = tempB;
       }
       else if(func(instruction) == SLL_FUNC)
