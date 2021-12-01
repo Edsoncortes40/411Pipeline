@@ -434,7 +434,12 @@ void run(Pstate state) {
     else if(opcode(instruction) == REG_REG_OP)
     {
       /* check what kind of REG to REG instruction this is */
-      if(func(instruction) == ADD_FUNC)
+      if(instruction == NOPINSTRUCTION)
+      {
+	new.EXMEM.aluResult = 0;
+	new.EXMEM.readRegB = 0;
+      }
+      else if(func(instruction) == ADD_FUNC)
       {
 	new.EXMEM.aluResult = tempA + tempB;
 	new.EXMEM.readRegB = tempB;
@@ -463,11 +468,6 @@ void run(Pstate state) {
       {
 	new.EXMEM.aluResult = (unsigned int) tempA >> tempB;
 	new.EXMEM.readRegB = tempB;
-      }
-      else if(instruction == NOPINSTRUCTION)
-      {
-	new.EXMEM.aluResult = 0;
-	new.EXMEM.readRegB = 0;
       }
       else
       {
