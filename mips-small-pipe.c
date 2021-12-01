@@ -464,7 +464,7 @@ void run(Pstate state) {
 	new.EXMEM.aluResult = (unsigned int) tempA >> tempB;
 	new.EXMEM.readRegB = tempB;
       }
-      else if(func(instruction) == NOPINSTRUCTION)
+      else if(instruction == NOPINSTRUCTION)
       {
 	new.EXMEM.aluResult = 0;
 	new.EXMEM.readRegB = 0;
