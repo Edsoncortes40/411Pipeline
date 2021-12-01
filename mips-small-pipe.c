@@ -124,7 +124,7 @@ void run(Pstate state) {
     if((field_r2(lw_forwarding) == field_r2(instruction) || field_r2(lw_forwarding) == field_r1(instruction)) &&
        opcode(instruction) != HALT_OP &&
        opcode(instruction) == REG_REG_OP &&
-       opcode(lw_forwarding) == LW_OP)
+       opcode(state->IDEX.instr) == LW_OP)
       {
 	/* update ID to EX Register */
 	new.IDEX.instr = NOPINSTRUCTION;
@@ -175,58 +175,61 @@ void run(Pstate state) {
     tempA = new.reg[field_r1(instruction)];
     tempB = new.reg[field_r2(instruction)];
     
-    /* check EX to MEM register for forwarding */
-    if(checkForward1 == ADDI_OP)
+    /* check WB to END register for forwarding */
+    if(checkForward3 == ADDI_OP)
     {
-      if(checkForward1 != opcode(NOPINSTRUCTION))
+      if(checkForward3 != opcode(NOPINSTRUCTION))
       {
 
-	if(field_r1(instruction) == field_r2(state->EXMEM.instr)
+	if(field_r1(instruction) == field_r2(state->WBEND.instr)
 	   && field_r1(instruction) != 0)
 	  {
-	    tempA = state->EXMEM.aluResult;
+	    tempA = state->WBEND.writeData;
 	  }
 	
-	if(field_r2(instruction) == field_r2(state->EXMEM.instr)
+	if(field_r2(instruction) == field_r2(state->WBEND.instr)
 	   && field_r2(instruction != 0))
 	  {
-	    tempB = state->EXMEM.aluResult;
+	    tempB = state->WBEND.writeData;
 	  }
       }
     }
-    else if(checkForward1 == LW_OP)
+    else if(checkForward3 == LW_OP)
     {
-      if(checkForward1 != opcode(NOPINSTRUCTION))
+      if(checkForward3 != opcode(NOPINSTRUCTION))
       {
-	if(field_r1(instruction) == field_r2(state->EXMEM.instr)
+	if(field_r1(instruction) == field_r2(state->WBEND.instr)
 	   && field_r1(instruction) != 0)
 	  {
-	    tempA = state->EXMEM.aluResult;
+	    tempA = state->WBEND.writeData;
 	  }
 	
-	if(field_r2(instruction) == field_r2(state->EXMEM.instr)
+	if(field_r2(instruction) == field_r2(state->WBEND.instr)
 	   && field_r2(instruction) != 0)
 	  {
-	    tempB = state->EXMEM.aluResult;
+	    tempB = state->WBEND.writeData;
 	  }
       }
     }
-    else if(checkForward1 == SW_OP)
+    else if(checkForward3 == SW_OP)
     {
-      /* ??? */
+      if(field_r2(instruction) == field_r2(state->WBEND.instr))
+      {
+	tempB = state->EXMEM.aluResult;
+      }
     }
-    else if(checkForward1 == REG_REG_OP)
+    else if(checkForward3 == REG_REG_OP)
     {
-      if(field_r1(instruction) == field_r3(state->EXMEM.instr)
+      if(field_r1(instruction) == field_r3(state->WBEND.instr)
 	 && field_r1(instruction) != 0)
 	{
-	  tempA = state->EXMEM.aluResult;
+	  tempA = state->WBEND.writeData;
 	}
       
-      if(field_r2(instruction) == field_r3(state->EXMEM.instr)
+      if(field_r2(instruction) == field_r3(state->WBEND.instr)
 	 && field_r2(instruction != 0))
 	{
-	  tempB = state->EXMEM.aluResult;
+	  tempB = state->WBEND.writeData;
 	}
     }
     else if(checkForward1 == HALT_OP)
@@ -330,64 +333,59 @@ void run(Pstate state) {
       /* printf("no Fowarding in MEM to WB register!"); */
     }
     
-    /* check WB to END register for forwarding */
-    if(checkForward3 == ADDI_OP)
+    /* check EX to MEM register for forwarding */
+    if(checkForward1 == ADDI_OP)
     {
-      if(checkForward3 != opcode(NOPINSTRUCTION))
+      if(checkForward1 != opcode(NOPINSTRUCTION))
       {
-	if(field_r1(instruction) == field_r2(state->WBEND.instr)
+	if(field_r1(instruction) == field_r2(state->EXMEM.instr)
 	   && field_r1(instruction) != 0)
 	  {
-	    tempA = state->WBEND.writeData;
+	    tempA = state->EXMEM.aluResult;
 	  }
 	
-	if(field_r2(instruction) == field_r2(state->WBEND.instr)
+	if(field_r2(instruction) == field_r2(state->EXMEM.instr)
 	   && field_r2(instruction) != 0)
 	  {
-	    tempB = state->WBEND.writeData;
+	    tempB = state->EXMEM.aluResult;
 	  }
       }
     }
-    else if(checkForward3 == LW_OP)
+    else if(checkForward1 == LW_OP)
     {
-      if(checkForward3 != opcode(NOPINSTRUCTION))
+      if(checkForward1 != opcode(NOPINSTRUCTION))
       {
-	if(field_r1(instruction) == field_r2(state->WBEND.instr)
+	if(field_r1(instruction) == field_r2(state->EXMEM.instr)
 	   && field_r1(instruction) != 0)
 	  {
-	    tempA = state->WBEND.writeData;
+	    tempA = state->EXMEM.aluResult;
 	  }
 	
-	if(field_r2(instruction) == field_r2(state->WBEND.instr)
+	if(field_r2(instruction) == field_r2(state->EXMEM.instr)
 	   && field_r2(instruction) != 0)
 	  {
-	    tempB = state->WBEND.writeData;
+	    tempB = state->EXMEM.aluResult;
 	  }
       }
     }
-    else if(checkForward3 == SW_OP)
+    else if(checkForward1 == SW_OP)
     {
-      if(field_r2(instruction) == field_r2(new.WBEND.instr)
-	 && field_r2(instruction) != 0
-	 && checkForward3 != opcode(NOPINSTRUCTION))
-      {
-	tempB = state->EXMEM.aluResult;
-      }
+      /* ??? */
     }
-    else if(checkForward3 == REG_REG_OP)
+    else if(checkForward1 == REG_REG_OP)
     {
-      if(checkForward3 != opcode(NOPINSTRUCTION))
+      if(checkForward1 != opcode(NOPINSTRUCTION))
       {
-	if(field_r1(instruction) == field_r3(state->WBEND.instr
+	if(field_r1(instruction) == field_r3(state->EXMEM.instr
 	   && field_r1(instruction) != 0))
 	  {
-	    tempA = state->WBEND.writeData;
+	    tempA = state->EXMEM.aluResult;
 	  }
 	
 	if(field_r2(instruction) == field_r3(state->WBEND.instr)
 	   && field_r2(instruction) != 0)
 	  {
-	    tempB = state->WBEND.writeData;
+	    tempB = state->EXMEM.aluResult;
 	  }
       }
     }
