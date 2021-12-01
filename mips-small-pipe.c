@@ -477,7 +477,7 @@ void run(Pstate state) {
     else if(opcode(instruction) == BEQZ_OP)
     {
       if((state->IDEX.offset < 0 && tempA == 0)
-	 || (state->IDEX.offset > 0 && tempA != 0))
+	 && (state->IDEX.offset > 0 && tempA != 0))
       {
 	new.EXMEM.aluResult = state->IDEX.pcPlus1 + offset(instruction);
 	new.EXMEM.readRegB = new.reg[field_r2(instruction)];
