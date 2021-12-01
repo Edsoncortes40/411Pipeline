@@ -152,7 +152,7 @@ void run(Pstate state) {
 	new.IDEX.readRegA = 0;
 	new.IDEX.readRegB = 0;
       
-	/* pdate instruction to IF to ID instruction */
+	/*update instruction to IF to ID instruction */
 	instruction = state->IFID.instr;
 	new.IFID.instr = instruction;
 	new.pc = new.pc - 4;
