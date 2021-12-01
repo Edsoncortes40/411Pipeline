@@ -224,6 +224,21 @@ void run(Pstate state) {
     {
       printf("Halt in progress");
     }
+    else if(checkForward1 == BEQZ_OP)
+    {
+      if(checkForward1 != opcode(NOPINSTRUCTION))
+      {
+	if(field_r1(instruction) == field_r2(state->EXMEM.instr))
+	{
+	  tempA = state->EXMEM.aluResult;
+	}
+
+	if(field_r2(instruction) == field_r2(state->EXMEM.instr))
+	{
+	  tempB = state->EXMEM.aluResult;
+        }
+      }
+    }
     else
     {
       printf("No forwarding in EX to MEM register!");
@@ -282,9 +297,24 @@ void run(Pstate state) {
 	tempB = state->MEMWB.writeData;
       }
     }
-    else if(HALT_OP)
+    else if(checkForward2 == HALT_OP)
     {
       printf("Halt in progress");
+    }
+    else if(checkForward2 == BEQZ_OP)
+    {
+      if(checkForward2 != opcode(NOPINSTRUCTION))
+      {
+	if(field_r1(instruction) == field_r2(state->MEMWB.instr))
+	{
+	  tempA = state->MEMWB.writeData;
+	}
+
+	if(field_r2(instruction) == field_r2(state->MEMWB.instr))
+	{
+	  tempB = state->MEMWB.writeData;
+	}
+      }
     }
     else
     {
@@ -356,6 +386,21 @@ void run(Pstate state) {
     {
       printf("halt in progress!");
     }
+    else if(checkForward3 == BEQZ_OP)
+    {
+      if(checkForward3 != opcode(NOPINSTRUCTION))
+      {
+	if(field_r1(instruction) == field_r2(state->WBEND.instr))
+	{
+	  tempA = state->WBEND.writeData;
+	}
+
+	if(field_r2(instruction) == field_r2(state->WBEND.instr))
+	{
+	  tempB = state->WBEND.writeData;
+	}
+      }
+    }
     else
     {
       printf("no forwarding in WB to END register!");
@@ -420,6 +465,10 @@ void run(Pstate state) {
 	printf("error in reg to reg function decode!");
       }
     }
+    else if(opcode(instruction) == BEQZ_OP)
+    {
+      
+    }
     else
     {
       printf("error in opcode in execution!");
@@ -452,6 +501,14 @@ void run(Pstate state) {
     {
       new.MEMWB.writeData = 0;
     }
+    else if(opcode(instruction) == BEQZ_OP)
+    {
+      new.MEMWB.writeData = state->EXMEM.aluResult;
+    }
+    else
+    {
+      printf("error in MEM stage!");
+    }
     /* --------------------- WB stage --------------------- */
     instruction = state->MEMWB.instr;
     new.WBEND.instr = instruction;
@@ -478,6 +535,10 @@ void run(Pstate state) {
       else if(opcode(instruction) == HALT_OP)
       {
 	exit(0);
+      }
+      else if(opcode(instruction) == BEQZ_OP)
+      {
+	new.WBEND.writeData = state->MEMWB.writeData;
       }
       else
       {
