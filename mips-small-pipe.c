@@ -247,13 +247,13 @@ void run(Pstate state) {
 	if(field_r1(instruction) == field_r2(state->WBEND.instr)
 	   && field_r1(instruction) != 0)
 	{
-	  tempA = state->WBEND.aluResult;
+	  tempA = state->WBEND.writeData;
 	}
 
 	if(field_r2(instruction) == field_r2(state->WBEND.instr)
 	   && field_r2(instruction) != 0)
 	{
-	  tempB = state->WBEND.aluResult;
+	  tempB = state->WBEND.writeData;
         }
       }
     }
@@ -385,12 +385,12 @@ void run(Pstate state) {
       if(checkForward1 != opcode(NOPINSTRUCTION))
       {
 	if(field_r1(instruction) == field_r3(state->EXMEM.instr)
-	   && field_r1(instruction) != 0))
+	   && field_r1(instruction) != 0)
 	  {
 	    tempA = state->EXMEM.aluResult;
 	  }
 	
-	if(field_r2(instruction) == field_r3(state->WBEND.instr)
+	if(field_r2(instruction) == field_r3(state->EXMEM.instr)
 	   && field_r2(instruction) != 0)
 	  {
 	    tempB = state->EXMEM.aluResult;
@@ -407,12 +407,12 @@ void run(Pstate state) {
       {
 	if(field_r1(instruction) == field_r2(state->EXMEM.instr))
 	{
-	  tempA = state->EXMEM.writeData;
+	  tempA = state->EXMEM.aluResult;
 	}
 
 	if(field_r2(instruction) == field_r2(state->EXMEM.instr))
 	{
-	  tempB = state->EXMEM.writeData;
+	  tempB = state->EXMEM.aluResult;
 	}
       }
     }
