@@ -94,7 +94,16 @@ void run(Pstate state) {
     new.pc = new.pc + 4;
 
     /* update program counter in IF to ID register */
-    new.IFID.pcPlus1 = new.pc;
+    /* check if taken first */
+    if(opcode(new.IFID.instr) == BEQZ_OP && offset(instruction) < 1)
+    {
+      new.IFID.pcPlus1 = new.pc;
+      new.pc = new.pc + offset(instruction);
+    }
+    else
+    {
+      new.IFID.pcPlus1 = new.pc;
+    }
     
     /* --------------------- ID stage --------------------- */
 
