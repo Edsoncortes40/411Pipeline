@@ -231,7 +231,7 @@ void run(Pstate state) {
     }
     else if(checkForward1 == HALT_OP)
     {
-      printf("Halt in progress");
+      /* printf("Halt in progress"); */
     }
     else if(checkForward1 == BEQZ_OP)
     {
@@ -250,7 +250,7 @@ void run(Pstate state) {
     }
     else
     {
-      printf("No forwarding in EX to MEM register!");
+      /* printf("No forwarding in EX to MEM register!"); */
     }
     
     /* check MEM to WB register for forwarding */
@@ -308,7 +308,7 @@ void run(Pstate state) {
     }
     else if(checkForward2 == HALT_OP)
     {
-      printf("Halt in progress");
+      /* printf("Halt in progress"); */
     }
     else if(checkForward2 == BEQZ_OP)
     {
@@ -327,7 +327,7 @@ void run(Pstate state) {
     }
     else
     {
-      printf("no Fowarding in MEM to WB register!");
+      /* printf("no Fowarding in MEM to WB register!"); */
     }
     
     /* check WB to END register for forwarding */
@@ -393,7 +393,7 @@ void run(Pstate state) {
     }
     else if(checkForward3 == HALT_OP)
     {
-      printf("halt in progress!");
+      /* printf("halt in progress!"); */
     }
     else if(checkForward3 == BEQZ_OP)
     {
@@ -412,7 +412,7 @@ void run(Pstate state) {
     }
     else
     {
-      printf("no forwarding in WB to END register!");
+      /* printf("no forwarding in WB to END register!"); */
     }
     
     /* execute instructions */
@@ -471,7 +471,7 @@ void run(Pstate state) {
       }
       else
       {
-	printf("error in reg to reg function decode!");
+	/* printf("error in reg to reg function decode!"); */
       }
     }
     else if(opcode(instruction) == BEQZ_OP)
@@ -535,7 +535,7 @@ void run(Pstate state) {
     }
     else
     {
-      printf("error in MEM stage!");
+      /* printf("error in MEM stage!"); */
     }
     /* --------------------- WB stage --------------------- */
     instruction = state->MEMWB.instr;
@@ -570,7 +570,7 @@ void run(Pstate state) {
       }
       else
       {
-	printf("error in reading opcode in WB stage");
+	/* printf("error in reading opcode in WB stage"); */
       }
 
       tempA = 0;
