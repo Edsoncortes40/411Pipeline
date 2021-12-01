@@ -180,7 +180,6 @@ void run(Pstate state) {
     {
       if(checkForward3 != opcode(NOPINSTRUCTION))
       {
-
 	if(field_r1(instruction) == field_r2(state->WBEND.instr)
 	   && field_r1(instruction) != 0)
 	  {
@@ -213,41 +212,48 @@ void run(Pstate state) {
     }
     else if(checkForward3 == SW_OP)
     {
-      if(field_r2(instruction) == field_r2(state->WBEND.instr))
+      if(field_r2(instruction) == field_r2(state->WBEND.instr)
+	 && checkForward3 != opcode(NOPINSTRUCTION)
+	 && field_r2(instruction) != 0)
       {
 	tempB = state->EXMEM.aluResult;
       }
     }
     else if(checkForward3 == REG_REG_OP)
     {
-      if(field_r1(instruction) == field_r3(state->WBEND.instr)
-	 && field_r1(instruction) != 0)
-	{
-	  tempA = state->WBEND.writeData;
-	}
-      
-      if(field_r2(instruction) == field_r3(state->WBEND.instr)
-	 && field_r2(instruction != 0))
-	{
-	  tempB = state->WBEND.writeData;
-	}
+      if(checkForward3 != opcode(NOPINSTRUCTION))
+      {	
+	if(field_r1(instruction) == field_r3(state->WBEND.instr)
+	   && field_r1(instruction) != 0)
+	  {
+	    tempA = state->WBEND.writeData;
+	  }
+	
+	if(field_r2(instruction) == field_r3(state->WBEND.instr)
+	   && field_r2(instruction != 0))
+	  {
+	    tempB = state->WBEND.writeData;
+	  }
+      }
     }
-    else if(checkForward1 == HALT_OP)
+    else if(checkForward3 == HALT_OP)
     {
       /* printf("Halt in progress"); */
     }
-    else if(checkForward1 == BEQZ_OP)
+    else if(checkForward3 == BEQZ_OP)
     {
-      if(checkForward1 != opcode(NOPINSTRUCTION))
+      if(checkForward3 != opcode(NOPINSTRUCTION))
       {
-	if(field_r1(instruction) == field_r2(state->EXMEM.instr))
+	if(field_r1(instruction) == field_r2(state->WBEND.instr)
+	   && field_r1(instruction) != 0)
 	{
-	  tempA = state->EXMEM.aluResult;
+	  tempA = state->WBEND.aluResult;
 	}
 
-	if(field_r2(instruction) == field_r2(state->EXMEM.instr))
+	if(field_r2(instruction) == field_r2(state->WBEND.instr)
+	   && field_r2(instruction) != 0)
 	{
-	  tempB = state->EXMEM.aluResult;
+	  tempB = state->WBEND.aluResult;
         }
       }
     }
@@ -317,12 +323,14 @@ void run(Pstate state) {
     {
       if(checkForward2 != opcode(NOPINSTRUCTION))
       {
-	if(field_r1(instruction) == field_r2(state->MEMWB.instr))
+	if(field_r1(instruction) == field_r2(state->MEMWB.instr)
+	   && field_r1(instruction) != 0)
 	{
 	  tempA = state->MEMWB.writeData;
 	}
 
-	if(field_r2(instruction) == field_r2(state->MEMWB.instr))
+	if(field_r2(instruction) == field_r2(state->MEMWB.instr)
+	   && field_r1(instruction) != 0)
 	{
 	  tempB = state->MEMWB.writeData;
 	}
@@ -376,7 +384,7 @@ void run(Pstate state) {
     {
       if(checkForward1 != opcode(NOPINSTRUCTION))
       {
-	if(field_r1(instruction) == field_r3(state->EXMEM.instr
+	if(field_r1(instruction) == field_r3(state->EXMEM.instr)
 	   && field_r1(instruction) != 0))
 	  {
 	    tempA = state->EXMEM.aluResult;
@@ -389,22 +397,22 @@ void run(Pstate state) {
 	  }
       }
     }
-    else if(checkForward3 == HALT_OP)
+    else if(checkForward1 == HALT_OP)
     {
       /* printf("halt in progress!"); */
     }
-    else if(checkForward3 == BEQZ_OP)
+    else if(checkForward1 == BEQZ_OP)
     {
-      if(checkForward3 != opcode(NOPINSTRUCTION))
+      if(checkForward1 != opcode(NOPINSTRUCTION))
       {
-	if(field_r1(instruction) == field_r2(state->WBEND.instr))
+	if(field_r1(instruction) == field_r2(state->EXMEM.instr))
 	{
-	  tempA = state->WBEND.writeData;
+	  tempA = state->EXMEM.writeData;
 	}
 
-	if(field_r2(instruction) == field_r2(state->WBEND.instr))
+	if(field_r2(instruction) == field_r2(state->EXMEM.instr))
 	{
-	  tempB = state->WBEND.writeData;
+	  tempB = state->EXMEM.writeData;
 	}
       }
     }
